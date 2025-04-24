@@ -1,8 +1,11 @@
 from flask import Flask, request, jsonify
 import os
 from dotenv import load_dotenv
+from faker import Faker
 
 load_dotenv()
+
+fake = Faker()
 
 app = Flask(__name__)
 
@@ -40,35 +43,35 @@ def register(registerType, arsId):
 
     # --- Construct Mock Response ---
     response = {
-        "entryNumber": 123456,
-        "entryTimestamp": "12:34:56:78",
-        "registerKey": arsId,
-        "personName": {
-            "givenNames": "Sargam",
-            "middleNames": "N/A",
-            "familyName": "Puram",
-            "nameInDispute": False
-        },
-        "personNameTransliterated": {
-            "givenNamesTransliterated": "Sargam",
-            "familyNameTransliterated": "Puram"
-        },
-        "gender": "Female",
-        "genderInDispute": False,
-        "dateOfBirth": "2003-08-21",
-        "dateOfBirthInDispute": False,
-        "placeOfBirth": "Pune",
-        "placeOfBirthInDispute": False,
-        "placeOfBirthTransliterated": "Pune",
-        "countryOfBirth": "India",
-        "countryOfBirthInDispute": False,
-        "identityStatus": "Verified",
-        "legacyId": "LEG-2025-SG",
-        "verificationDate": {
-            "dateVerified": "2025-04-23",
-            "expiryDate": "2030-04-23"
-        }
+    "entryNumber": fake.random_int(min=100000, max=999999),
+    "entryTimestamp": fake.time(pattern="%H:%M:%S:%f")[:-3],
+    "registerKey": arsId,
+    "personName": {
+        "givenNames": fake.first_name(),
+        "middleNames": fake.first_name(),
+        "familyName": fake.last_name(),
+        "nameInDispute": fake.boolean()
+    },
+    "personNameTransliterated": {
+        "givenNamesTransliterated": fake.first_name(),
+        "familyNameTransliterated": fake.last_name()
+    },
+    "gender": fake.random_element(elements=("Male", "Female")),
+    "genderInDispute": fake.boolean(),
+    "dateOfBirth": fake.date_of_birth(minimum_age=18, maximum_age=80).isoformat(),
+    "dateOfBirthInDispute": fake.boolean(),
+    "placeOfBirth": fake.city(),
+    "placeOfBirthInDispute": fake.boolean(),
+    "placeOfBirthTransliterated": fake.city(),
+    "countryOfBirth": fake.country(),
+    "countryOfBirthInDispute": fake.boolean(),
+    "identityStatus": "Verified",
+    "legacyId": f"LEG-{fake.year()}-{fake.random_uppercase_letter()}{fake.random_uppercase_letter()}",
+    "verificationDate": {
+        "dateVerified": fake.date_this_decade().isoformat(),
+        "expiryDate": fake.date_between(start_date="+1y", end_date="+10y").isoformat()
     }
+}
 
     return jsonify(response), 200
 
