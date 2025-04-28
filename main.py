@@ -33,5 +33,39 @@ def store_token():
     r.set("oauth_token", token, ex=900)  # 900 seconds = 15 minutes
     print("Token stored in Redis for 15 minutes.")
 
+
+def send_mock_request():
+    token = r.get("oauth_token")
+    if not token:
+        print("No token found in Redis. Exiting.")
+        return
+
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json",
+        "CorrelationId": "test-corr-id",
+        "ClientName": "my-client"
+    }
+
+    payload = {
+        "serviceAccessDataDetails": {
+            "clientName": "my-client",
+            "globalTransactionId": "txn-001",
+            "recordRestricted": False,
+            "registerAccessed": True,
+            "requestId": "req-001",
+            "requestReason": "Verification",
+            "requestTimestamp": "2025-04-23T12:00:00Z",
+            "requesterType": "internal",
+            "subjectRegisterId": "subject-12345"
+        }
+    }
+
+    response = requests.post("http://localhost:5001/register/verified-identity/ARS12345", json=payload, headers=headers)
+    print(response.json())
+
+
+
 if __name__ == "__main__":
     store_token()
+    send_mock_request()
